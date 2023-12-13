@@ -4,7 +4,7 @@ from django.conf import settings
 
 from .forms import OrderForm
 from .models import Order, OrderLineItem
-from products.models import products
+from products.models import Product
 from bag.contexts import bag_contents
 
 import stripe
@@ -18,15 +18,15 @@ def checkout(request):
         bag = request.session.get('bag', {})
 
         form_data = {
-            'full_name': request.post['full_name'],
-            'email': request.post['email'],
-            'phone_number': request.post['phone_number'],
-            'country': request.post['country'],
-            'postcode': request.post['postcode'],
-            'town_or_city': request.post['town_or_city'],
-            'street_address1': request.post['street_address1'],
-            'street_address2': request.post['street_address2'],
-            'county': request.post['county'],
+            'full_name': request.POST['full_name'],
+            'email': request.POST['email'],
+            'phone_number': request.POST['phone_number'],
+            'country': request.POST['country'],
+            'postcode': request.POST['postcode'],
+            'town_or_city': request.POST['town_or_city'],
+            'street_address1': request.POST['street_address1'],
+            'street_address2': request.POST['street_address2'],
+            'county': request.POST['county'],
         }
         order_form = OrderForm(form_data)
         if order_form.is_valid():
@@ -50,23 +50,23 @@ def checkout(request):
                                 product_size=size,
                             )
                             order_line_item.save()
-                except Prodcut.DoesNotExist:
+                except Product.DoesNotExist:
                     messages.error(request, (
-                        "One of the products in your bag wasn't found in our database."
+                        "One of the products in your bag wasn't found in our database. "
                         "Please call us for assistance!")
-                        )
-                        order.delete()
-                        return redirect(reverse('view_bag'))
+                    )
+                    order.delete()
+                    return redirect(reverse('view_bag'))
 
-            request.session['save_info'] = 'save_info' in request.POST
+            request.session['save_info'] = 'save-info' in request.POST
             return redirect(reverse('checkout_success', args=[order.order_number]))
         else:
-            message.error(request, 'There was an error with your form. \
-            Please double check your information.')
+            messages.error(request, 'There was an error with your form. \
+                Please double check your information.')
     else:
         bag = request.session.get('bag', {})
         if not bag:
-            messages.error(request, "There's nothing in your bag at the moment.")
+            messages.error(request, "There's nothing in your bag at the moment")
             return redirect(reverse('products'))
 
         current_bag = bag_contents(request)
@@ -78,12 +78,11 @@ def checkout(request):
             currency=settings.STRIPE_CURRENCY,
         )
 
-
-    order_form = OrderForm()
+        order_form = OrderForm()
 
     if not stripe_public_key:
-        messages.warning(request, "Stripe public key is missing. \
-        Did you forget to set it in your environment?")
+        messages.warning(request, 'Stripe public key is missing. \
+            Did you forget to set it in your environment?')
 
     template = 'checkout/checkout.html'
     context = {
@@ -102,12 +101,12 @@ def checkout_success(request, order_number):
     save_info = request.session.get('save_info')
     order = get_object_or_404(Order, order_number=order_number)
     messages.success(request, f'Order successfully processed! \
-    Your order number is {order.number}. A confirmation \
-    email will be sent to {order.email}.')
+        Your order number is {order_number}. A confirmation \
+        email will be sent to {order.email}.')
 
     if 'bag' in request.session:
-        def request.session['bag']
-    
+        del request.session['bag']
+
     template = 'checkout/checkout_success.html'
     context = {
         'order': order,
