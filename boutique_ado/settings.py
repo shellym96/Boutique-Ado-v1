@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', '')
 #DEBUG = 'DEVELOPMENT' in os.environ
 DEBUG = True
 
-ALLOWED_HOSTS = ['8000-shellym96-boutiqueadov1-a5ol9f6gblb.ws-eu107.gitpod.io', 'boutique-ado-online1.herokuapp.com', 'localhost']
+ALLOWED_HOSTS = ['8000-shellym96-boutiqueadov1-a5ol9f6gblb.ws-eu107.gitpod.io', 'boutique-ado-online1-c32f1da95e9e.herokuapp.com', 'localhost']
 
 
 # Application definition
